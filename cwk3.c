@@ -92,7 +92,14 @@ int main( int argc, char **argv )
 		device,
 		CL_DEVICE_MAX_WORK_GROUP_SIZE,
 		sizeof(size_t),
-		maxWorkItems,
+		&maxWorkItems[0],
+		NULL
+	);
+	clGetDeviceInfo(
+		device,
+		CL_DEVICE_MAX_WORK_GROUP_SIZE,
+		sizeof(size_t),
+		&maxWorkItems[1],
 		NULL
 	);
 
