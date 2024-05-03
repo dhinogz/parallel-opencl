@@ -87,12 +87,12 @@ int main( int argc, char **argv )
 	
 	// Global size is mapped to size of matrix NxM
 	size_t globalSize[2] = {N, M};
-	size_t maxWorkItems;
+	size_t maxWorkItems[2];
 	clGetDeviceInfo(
 		device,
 		CL_DEVICE_MAX_WORK_GROUP_SIZE,
 		sizeof(size_t),
-		&maxWorkItems,
+		maxWorkItems,
 		NULL
 	);
 
@@ -103,7 +103,7 @@ int main( int argc, char **argv )
 		2, // work is two-dimensional
 		NULL,
 		globalSize,
-		&maxWorkItems, // work group size will be calculated automatically
+		maxWorkItems,
 		0,
 		NULL,
 		NULL
