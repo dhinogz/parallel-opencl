@@ -87,6 +87,14 @@ int main( int argc, char **argv )
 	
 	// Global size is mapped to size of matrix NxM
 	size_t globalSize[2] = {N, M};
+	size_t maxWorkItems;
+	clGetDeviceInfo(
+		device,
+		CL_DEVICE_MAX_WORK_GROUP_SIZE,
+		sizeof(size_t),
+		&maxWorkItems,
+		NULL
+	);
 
 	// Enqueue command to execute kernel calculateWeights on device
 	status = clEnqueueNDRangeKernel(
@@ -95,7 +103,7 @@ int main( int argc, char **argv )
 		2, // work is two-dimensional
 		NULL,
 		globalSize,
-		NULL, // work group size will be calculated automatically
+		&maxWorkItems, // work group size will be calculated automatically
 		0,
 		NULL,
 		NULL
