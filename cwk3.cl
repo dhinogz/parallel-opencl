@@ -5,7 +5,7 @@ void calculateWeights(__global float *gradients, __global float *inputs, __globa
     int j = get_global_id(1);
     int m = get_global_size(1);
 
-    printf("%i\n%d %.6f\n%d %.6f\n", i, i*m+j, i, gradients[i], j, inputs[j]);
+    printf("index: %.6f\ni: %d gradient: %.6f\nj: %d input: %.6f\n", i*m+j, i, gradients[i], j, inputs[j]);
 
     weights[i*m+j] += gradients[i] * inputs[j];
 }
