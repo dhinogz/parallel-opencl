@@ -82,7 +82,7 @@ int main( int argc, char **argv )
 	size_t globalSize[2] = {N, M};
 
 	// TODO: determine work group max size based on my device
-	size_t workGroupSize[2] = {N, M};
+	// size_t workGroupSize[2] = {N,M};
 
 	// Kernel into command queue
 	status = clEnqueueNDRangeKernel(
@@ -91,8 +91,7 @@ int main( int argc, char **argv )
 		2, 
 		NULL, 
 		globalSize, 
-		workGroupSize,
-		// NULL, // work group size will be calculated automatically
+		NULL, // work group size will be calculated automatically
 		0, 
 		NULL, 
 		NULL
