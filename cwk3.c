@@ -46,6 +46,16 @@ int main( int argc, char **argv )
 		*weights   = (float*) malloc( N*M*sizeof(float) );
 	initialiseArrays( gradients, inputs, weights, N, M );			// DO NOT REMOVE.
 	
+	// Implement the serial solution to the problem
+	// INFO: Serial calculation to confirm calculation
+	// TODO: REMOVE before submitting
+	float *serial_weights   = (float*) malloc( N*M*sizeof(float));
+	for( int i=0; i<N*M; i++ ) serial_weights[i] = weights[i];
+	serialCalculateWeights(gradients, inputs, serial_weights, N, M);
+	displayWeights(serial_weights, N, M);
+	free(serial_weights);
+	// INFO: Until here
+
 	//
 	// Implement the GPU solution to the problem.
 	//
@@ -119,15 +129,6 @@ int main( int argc, char **argv )
 	// Output result to screen. DO NOT REMOVE THIS LINE (or alter displayWeights() in helper_cwk.h); this will be replaced
 	// with a different displayWeights() for the the assessment, so any changes you might make will be lost.
 	displayWeights( weights, N, M) ;								// DO NOT REMOVE.
-
-	// INFO: Serial calculation to confirm calculation
-	// TODO: REMOVE before submitting
-	float *serial_weights   = (float*) malloc( N*M*sizeof(float));
-	for( int i=0; i<N*M; i++ ) serial_weights[i] = weights[i];
-	serialCalculateWeights(gradients, inputs, serial_weights, N, M);
-	displayWeights(serial_weights, N, M);
-	free(serial_weights);
-	// INFO: Until here
 	
 	// free device buffers
 	free(device_gradients);
