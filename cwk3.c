@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "helper_cwk.h"			// Note this is not the same as the 'helper.h' used for examples.
 
+// TODO: Remove before submitting
 void serialCalculateWeights(float *gradients, float *inputs, float *weights, int N, int M) {
 	for( int i=0; i<N; i++ )
 		for( int j=0; j<M; j++)
@@ -42,13 +43,8 @@ int main( int argc, char **argv )
 	float
 		*gradients = (float*) malloc( N  *sizeof(float) ),
 		*inputs    = (float*) malloc(   M*sizeof(float) ),
-		*weights   = (float*) malloc( N*M*sizeof(float) ),
-		*serial_weights   = (float*) malloc( N*M*sizeof(float) );
+		*weights   = (float*) malloc( N*M*sizeof(float) );
 	initialiseArrays( gradients, inputs, weights, N, M );			// DO NOT REMOVE.
-	for( int i=0; i<N*M; i++ ) serial_weights[i] = weights[i]; 
-	
-
-	
 	
 	//
 	// Implement the GPU solution to the problem.
@@ -64,7 +60,7 @@ int main( int argc, char **argv )
 	// create buffer in device for inputs of size M 
 	cl_mem device_inputs= clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, M*sizeof(float), inputs, &status);
 
-	// create buffer for weights. Nothing would be copied to device since it's the result
+	// create buffer for weights. result will be written on this buffer so CL_MEM_READ_WRITE flag is used
 	cl_mem device_weights= clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, N*M*sizeof(float), weights, &status);
 
 	//
@@ -74,26 +70,24 @@ int main( int argc, char **argv )
 	// Build kernel code function in cwk3.cl
 	cl_kernel kernel = compileKernelFromFile("cwk3.cl", "calculateWeights", context, device);
 	
-	// Specify args to kernel
+	// Specify args to kernel function
 	status = clSetKernelArg(kernel, 0, sizeof(cl_mem), &device_gradients);
 	status = clSetKernelArg(kernel, 1, sizeof(cl_mem), &device_inputs);
 	status = clSetKernelArg(kernel, 2, sizeof(cl_mem), &device_weights);
 	
+	// Global size is mapped to size of matrix NxM
 	size_t globalSize[2] = {N, M};
 
-	// TODO: determine work group max size based on my device
-	// size_t workGroupSize[2] = {N,M};
-
-	// Kernel into command queue
+	// Enqueue command to execute kernel calculateWeights on device
 	status = clEnqueueNDRangeKernel(
-		queue, 
+		queue,
 		kernel, 
-		2, 
-		NULL, 
-		globalSize, 
+		2, // work is two-dimensional
+		NULL,
+		globalSize,
 		NULL, // work group size will be calculated automatically
-		0, 
-		NULL, 
+		0,
+		NULL,
 		NULL
 	);
 	if (status != CL_SUCCESS){
@@ -101,8 +95,18 @@ int main( int argc, char **argv )
 		return EXIT_FAILURE;
 	}
 
-	// Get result back from device
-	status = clEnqueueReadBuffer(queue, device_weights, CL_TRUE, 0, N*M*sizeof(float), weights, 0, NULL, NULL);
+	// Get result back from device by reading device_weights buffer
+	status = clEnqueueReadBuffer(
+		queue,
+		device_weights, // buffer to be read
+		CL_TRUE,
+		0,
+		N*M*sizeof(float),
+		weights, // buffer to write to
+		0,
+		NULL,
+		NULL
+	);
 	if (status != CL_SUCCESS) {
 		printf("Could not copy data to host: %d\n", status);
 		return EXIT_FAILURE;
@@ -116,11 +120,17 @@ int main( int argc, char **argv )
 	// with a different displayWeights() for the the assessment, so any changes you might make will be lost.
 	displayWeights( weights, N, M) ;								// DO NOT REMOVE.
 
+	// INFO: Serial calculation to confirm calculation
+	// TODO: REMOVE before submitting
+	float *serial_weights   = (float*) malloc( N*M*sizeof(float));
+	for( int i=0; i<N*M; i++ ) serial_weights[i] = weights[i];
 	serialCalculateWeights(gradients, inputs, serial_weights, N, M);
+	displayWeights(serial_weights, N, M);
+	free(serial_weights);
+	// INFO: Until here
 	
-	displayWeights( serial_weights, N, M) ;								// DO NOT REMOVE.
-	// free cl buffers
-	free(device_gradients );
+	// free device buffers
+	free(device_gradients);
 	free(device_inputs);
 	free(device_weights);
 
@@ -128,12 +138,8 @@ int main( int argc, char **argv )
 	free( inputs    );
 	free( weights   );
 
-	// TODO: remove
-	free( serial_weights   );
-
 	// release kernel
 	clReleaseKernel(kernel);
-
 	clReleaseCommandQueue( queue   );
 	clReleaseContext     ( context );
 
