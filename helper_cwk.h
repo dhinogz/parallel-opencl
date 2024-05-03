@@ -60,7 +60,8 @@ void initialiseArrays( float *gradients, float *inputs, float *weights, int N, i
 	int i;
 	
 	// This is the only routine that uses pseudo-random numbers, so set the seed here.
-	srand( time(NULL) );
+	// srand( time(NULL) );
+	srand(0);
 
 	// Initialise to random numbers in the range 0 to 1.
 	for( i=0; i<N  ; i++ ) gradients[i] = 1.0 * rand() / RAND_MAX;
