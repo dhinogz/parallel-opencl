@@ -42,15 +42,11 @@ int main( int argc, char **argv )
 	float
 		*gradients = (float*) malloc( N  *sizeof(float) ),
 		*inputs    = (float*) malloc(   M*sizeof(float) ),
-		*weights   = (float*) malloc( N*M*sizeof(float) );
-	initialiseArrays( gradients, inputs, weights, N, M );			// DO NOT REMOVE.
-	//
-	
-	float
-		*serial_gradients = (float*) malloc( N  *sizeof(float) ),
-		*serial_inputs    = (float*) malloc(   M*sizeof(float) ),
+		*weights   = (float*) malloc( N*M*sizeof(float) ),
 		*serial_weights   = (float*) malloc( N*M*sizeof(float) );
-	initialiseArrays( serial_gradients, serial_inputs, serial_weights, N, M );			// DO NOT REMOVE.
+	initialiseArrays( gradients, inputs, weights, N, M );			// DO NOT REMOVE.
+	for( int i=0; i<N*M; i++ ) serial_weights[i] = weights[i]; 
+	
 
 	
 	
@@ -69,7 +65,7 @@ int main( int argc, char **argv )
 	cl_mem device_inputs= clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, M*sizeof(float), inputs, &status);
 
 	// create buffer for weights. Nothing would be copied to device since it's the result
-	cl_mem device_weights= clCreateBuffer(context, CL_MEM_WRITE_ONLY, N*M*sizeof(float), NULL, &status);
+	cl_mem device_weights= clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, N*M*sizeof(float), weights, &status);
 
 	//
 	// Perform calculations on the GPU
@@ -120,7 +116,7 @@ int main( int argc, char **argv )
 	// with a different displayWeights() for the the assessment, so any changes you might make will be lost.
 	displayWeights( weights, N, M) ;								// DO NOT REMOVE.
 
-	serialCalculateWeights(serial_gradients, serial_inputs, serial_weights, N, M);
+	serialCalculateWeights(gradients, inputs, serial_weights, N, M);
 	
 	displayWeights( serial_weights, N, M) ;								// DO NOT REMOVE.
 	// free cl buffers
@@ -133,8 +129,6 @@ int main( int argc, char **argv )
 	free( weights   );
 
 	// TODO: remove
-	free( serial_gradients );
-	free( serial_inputs    );
 	free( serial_weights   );
 
 	// release kernel
