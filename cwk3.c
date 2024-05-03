@@ -11,6 +11,11 @@
 #include <stdlib.h>
 #include "helper_cwk.h"			// Note this is not the same as the 'helper.h' used for examples.
 
+void serialCalculateWeights(float *gradients, float *inputs, float *weights, int N, int M) {
+	for( int i=0; i<N; i++ )
+		for( int j=0; j<M; j++)
+			weights[i*M+j] += gradients[i] * inputs[j];
+}
 
 //
 // Main.
@@ -39,6 +44,14 @@ int main( int argc, char **argv )
 		*inputs    = (float*) malloc(   M*sizeof(float) ),
 		*weights   = (float*) malloc( N*M*sizeof(float) );
 	initialiseArrays( gradients, inputs, weights, N, M );			// DO NOT REMOVE.
+	//
+	
+	float
+		*serial_gradients = (float*) malloc( N  *sizeof(float) ),
+		*serial_inputs    = (float*) malloc(   M*sizeof(float) ),
+		*serial_weights   = (float*) malloc( N*M*sizeof(float) );
+	initialiseArrays( serial_gradients, serial_inputs, serial_weights, N, M );			// DO NOT REMOVE.
+
 	
 	
 	//
@@ -106,7 +119,10 @@ int main( int argc, char **argv )
 	// Output result to screen. DO NOT REMOVE THIS LINE (or alter displayWeights() in helper_cwk.h); this will be replaced
 	// with a different displayWeights() for the the assessment, so any changes you might make will be lost.
 	displayWeights( weights, N, M) ;								// DO NOT REMOVE.
+
+	serialCalculateWeights(serial_gradients, serial_inputs, serial_weights, N, M);
 	
+	displayWeights( serial_weights, N, M) ;								// DO NOT REMOVE.
 	// free cl buffers
 	free(device_gradients );
 	free(device_inputs);
@@ -116,6 +132,11 @@ int main( int argc, char **argv )
 	free( inputs    );
 	free( weights   );
 
+	// TODO: remove
+	free( serial_gradients );
+	free( serial_inputs    );
+	free( serial_weights   );
+
 	// release kernel
 	clReleaseKernel(kernel);
 
@@ -124,3 +145,4 @@ int main( int argc, char **argv )
 
 	return EXIT_SUCCESS;
 }
+
