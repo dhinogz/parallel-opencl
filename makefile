@@ -8,7 +8,7 @@ EXE = cwk3
 OS = $(shell uname)
 
 ifeq ($(OS), Linux)
-	CC = gcc
+	CC = nvcc
 	LIBS = -lOpenCL
 	CCFLAGS = 
 endif
