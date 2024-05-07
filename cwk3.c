@@ -97,6 +97,12 @@ int main( int argc, char **argv )
 	);
 	size_t maxWorkItemsND[2] = {maxWorkItems/M, maxWorkItems/N};
 
+	// INFO: DELETE Ensure that local work size divides evenly into global size 
+	while (globalSize[0] % maxWorkItemsND[0] != 0 || globalSize[1] % maxWorkItemsND[1] != 0) {
+		maxWorkItemsND[0]--;
+		maxWorkItemsND[1] = maxWorkItems / maxWorkItemsND[0];
+	}
+
 	// Enqueue command to execute kernel calculateWeights on device
 	status = clEnqueueNDRangeKernel(
 		queue,
