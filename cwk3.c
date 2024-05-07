@@ -11,13 +11,6 @@
 #include <stdlib.h>
 #include "helper_cwk.h"			// Note this is not the same as the 'helper.h' used for examples.
 
-// TODO: Remove before submitting
-void serialCalculateWeights(float *gradients, float *inputs, float *weights, int N, int M) {
-	for( int i=0; i<N; i++ )
-		for( int j=0; j<M; j++)
-			weights[i*M+j] += gradients[i] * inputs[j];
-}
-
 //
 // Main.
 //
@@ -46,16 +39,6 @@ int main( int argc, char **argv )
 		*weights   = (float*) malloc( N*M*sizeof(float) );
 	initialiseArrays( gradients, inputs, weights, N, M );			// DO NOT REMOVE.
 	
-	// Implement the serial solution to the problem
-	// INFO: Serial calculation to confirm calculation
-	// TODO: REMOVE before submitting
-	float *serial_weights   = (float*) malloc( N*M*sizeof(float));
-	for( int i=0; i<N*M; i++ ) serial_weights[i] = weights[i];
-	serialCalculateWeights(gradients, inputs, serial_weights, N, M);
-	displayWeights(serial_weights, N, M);
-	free(serial_weights);
-	// INFO: Until here
-
 	//
 	// Implement the GPU solution to the problem.
 	//
@@ -87,6 +70,7 @@ int main( int argc, char **argv )
 	
 	// Global size is mapped to size of matrix NxM
 	size_t globalSize[2] = {N, M};
+
 	// size_t maxWorkItems;
 	// clGetDeviceInfo(
 	// 	device,
@@ -95,7 +79,9 @@ int main( int argc, char **argv )
 	// 	&maxWorkItems,
 	// 	NULL
 	// );
-	// size_t maxWorkItemsND[2] = {maxWorkItems/N, maxWorkItems/M};
+	
+	// couldn't get the maxWorkItems for ND working
+	size_t maxWorkItemsND[2] = {N, M};
 
 	// Enqueue command to execute kernel calculateWeights on device
 	status = clEnqueueNDRangeKernel(
@@ -104,8 +90,8 @@ int main( int argc, char **argv )
 		2, // work is two-dimensional
 		NULL,
 		globalSize,
-		// maxWorkItemsND,
-		NULL,
+		maxWorkItemsND,
+		// NULL,
 		0,
 		NULL,
 		NULL
