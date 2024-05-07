@@ -81,7 +81,7 @@ int main( int argc, char **argv )
 	// );
 	
 	// couldn't get the maxWorkItems for ND working
-	size_t maxWorkItemsND[2] = {N, M};
+	// size_t maxWorkItemsND[2] = {maxWorkItems/M, maxWorkItems/N};
 
 	// Enqueue command to execute kernel calculateWeights on device
 	status = clEnqueueNDRangeKernel(
@@ -90,8 +90,8 @@ int main( int argc, char **argv )
 		2, // work is two-dimensional
 		NULL,
 		globalSize,
-		maxWorkItemsND,
-		// NULL,
+		// maxWorkItemsND,
+		NULL,
 		0,
 		NULL,
 		NULL
