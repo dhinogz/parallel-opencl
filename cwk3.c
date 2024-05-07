@@ -95,7 +95,7 @@ int main( int argc, char **argv )
 		&maxWorkItems,
 		NULL
 	);
-	size_t maxWorkItemsND[2] = {N, M};
+	size_t maxWorkItemsND[2] = {maxWorkItems/N, maxWorkItems/M};
 
 	// INFO: DELETE Ensure that local work size divides evenly into global size 
 	while (globalSize[0] % maxWorkItemsND[0] != 0 || globalSize[1] % maxWorkItemsND[1] != 0) {
